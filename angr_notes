@@ -1,0 +1,65 @@
+# install docker first
+
+sudo apt-get update && sudo apt-get upgrade && sudo apt-get dist-upgrade
+sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+sudo nano /etc/apt/sources.list.d/docker.list
+# add to sources.list:
+deb https://apt.dockerproject.org/repo debian-jessie main
+# then ctrl-x, y, enter
+sudo apt-get install apt-transport-https ca-certificates
+sudo apt-get update && sudo apt-get install docker-engine
+sudo systemctl start docker
+sudo systemctl start docker
+systemctl status docker #check docker status
+sudo docker run hello-world #verify docker runs
+docker --version #check docker version
+
+#as root:
+curl -L https://github.com/docker/compose/releases/download/1.7.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose
+docker-compose --version
+
+# install angr
+
+mkdir /home/angr && cd /home/angr
+git clone https://github.com/angr/angr-dev.git
+# create the docker image from anger Dockerfile
+docker build -t angr < ../angr-dev/Dockerfile
+# test docker container
+docker run -it angr
+# container prompts type exit, enter
+# create volume for docker container
+mkdir /<path to folder for volume>/
+# create a testfile to check for in container
+cd /<path to folder for volume>/
+touch testfile
+# mount the volume
+docker run -it -v "$(pwd)":/src angr
+# (angr)
+cd /src
+ls -ltrah
+# file should be in that folder
+exit
+# return to host shell
+cp /<path to test files>/* /<path to folder for volume>/.
+ls -ltrah /<path to folder for volume>/
+# verify files are in the folder and run container again
+docker run -it -v "$(pwd)":/src angr
+# (angr)
+cd /src
+python <angr script>.py
+# in my case the file halfway through
+exit
+# return to host shell and clean up used containers
+docker rm $(docker ps -a | grep Exited | cut -d" " -f1)
+# cleaner clean up oneline
+docker rm $(docker ps -a -f status=exited -q)
+# clean up can be automatic after docker container exits
+#testing the angr script:
+docker run -it -v "$(pwd)":/src angr
+# (angr) angr@3576ad74f1fc:~$
+cd /src
+python solveTrigger_2parts.py 
+
+# angr script error can be found here:
+# https://pastebin.com/su3YnHAZ
